@@ -1,0 +1,141 @@
+{% extends "base.html" %} {% block title %}AnonShare - Serverless File Transfer{% endblock %} {% block extra_css %}
+<style>body{padding:20px}.app-container{max-width:1000px;margin:0 auto}.header{display:flex;justify-content:space-between;align-items:center;padding:20px 0;border-bottom:1px solid #333;margin-bottom:40px}.card{background:rgba(25,25,25,.9);border:1px solid #333;border-radius:16px;padding:30px;margin-bottom:30px;backdrop-filter:blur(10px);transition:all .3s ease}.card:hover{border-color:#444;box-shadow:0 10px 30px rgba(0,0,0,.3)}.card h2{font-size:1.5rem;margin-bottom:20px;color:#fff;display:flex;align-items:center;gap:10px}.card-icon{font-size:1.2rem}.role-selection{text-align:center;margin-bottom:30px}.role-selection h3{margin-bottom:20px;color:#fff;font-size:1.3rem}.role-selection p{color:#b0b0b0;margin-bottom:30px;font-size:1rem;line-height:1.5}.role-buttons{display:flex;gap:20px;justify-content:center;flex-wrap:wrap}.role-btn{padding:20px 30px;background:rgba(15,15,15,.8);border:2px solid #444;border-radius:12px;color:#e0e0e0;cursor:pointer;transition:all .3s ease;text-align:center;min-width:200px}.role-btn:hover{border-color:#00d4ff;background:rgba(0,212,255,.1);transform:translateY(-2px)}.role-btn.selected{border-color:#00d4ff;background:rgba(0,212,255,.2);color:#00d4ff}.role-icon{font-size:2rem;margin-bottom:10px;display:block}.role-title{font-size:1.1rem;font-weight:600;margin-bottom:5px}.role-desc{font-size:.9rem;color:#888}.connection-setup{display:none}.connection-setup.show{display:block}.mode-section{padding:25px;background:rgba(15,15,15,.8);border-radius:12px;border:1px solid #333;margin-bottom:20px}.mode-section h3{margin-bottom:15px;color:#00d4ff;font-size:1.2rem;display:flex;align-items:center;gap:10px}.mode-section p{font-size:.95rem;color:#b0b0b0;margin-bottom:20px;line-height:1.5}.step-indicator{background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.3);border-radius:8px;padding:15px;margin-bottom:20px;color:#00d4ff;font-size:.9rem;display:flex;align-items:center;gap:10px}.step-number{background:#00d4ff;color:#000;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:.8rem;flex-shrink:0}.sdp-container{margin-top:15px}.sdp-container label{display:block;margin-bottom:8px;color:#00d4ff;font-size:.9rem;font-weight:500}.sdp-display{background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.3);border-radius:8px;padding:15px;margin-bottom:10px;display:none}.sdp-display.show{display:block}.sdp-text{font-family:'Courier New',monospace;font-size:.8rem;color:#fff;word-break:break-all;max-height:150px;overflow-y:auto;background:rgba(0,0,0,.3);padding:10px;border-radius:4px;margin-bottom:10px}.copy-btn{font-size:.85rem;padding:8px 16px}.answer-section{display:none;margin-top:20px;padding-top:20px;border-top:1px solid #333}.answer-section.show{display:block}.file-input-container{position:relative;margin-bottom:20px}.file-input-button{display:block;width:100%;padding:20px;background:rgba(15,15,15,.8);border:2px dashed #444;border-radius:8px;color:#e0e0e0;text-align:center;cursor:pointer;transition:all .3s ease;font-size:1rem}.file-input-button:hover{border-color:#00d4ff;background:rgba(0,212,255,.05)}.file-input-button.has-files{border-color:#00d4ff;background:rgba(0,212,255,.1);color:#00d4ff}.file-input-hidden{position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer}.progress-container{margin:20px 0;padding:20px;background:rgba(15,15,15,.8);border-radius:12px;border:1px solid #333;display:none}.progress-container.show{display:block}.progress-info{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.progress-bar{width:100%;height:8px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden;margin-bottom:10px}.progress-fill{height:100%;background:linear-gradient(90deg,#00d4ff 0,#09c 100%);width:0%;transition:width .3s ease;border-radius:4px}.progress-text{font-size:.9rem;color:#b0b0b0}.connection-status{display:flex;align-items:center;gap:10px;padding:15px 20px;background:rgba(15,15,15,.8);border-radius:8px;border:1px solid #333;display:none}.connection-status.show{display:flex}.status-indicator{width:12px;height:12px;border-radius:50%;background:#666;transition:all .3s ease}.status-indicator.connected{background:#22c55e;box-shadow:0 0 10px rgba(34,197,94,.5)}.status-indicator.connecting{background:#f59e0b;animation:pulse 2s infinite}.status-indicator.disconnected{background:#ef4444}.file-list{margin-top:30px}.file-list h3{margin-bottom:20px;color:#fff;font-size:1.2rem}.file-item{display:flex;justify-content:space-between;align-items:center;padding:15px 20px;background:rgba(15,15,15,.8);border:1px solid #333;border-radius:8px;margin-bottom:10px;transition:all .3s ease}.file-item:hover{border-color:#444;background:rgba(25,25,25,.8)}.file-info{display:flex;flex-direction:column;gap:5px}.file-name{font-weight:500;color:#fff}.file-size{font-size:.85rem;color:#888}.file-section{display:none}.file-section.show{display:block}.instructions{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:15px;margin-bottom:20px;color:#f59e0b;font-size:.9rem;line-height:1.5}.instructions strong{color:#fff}.back-to-roles{margin-top:20px;text-align:center}.back-to-roles button{background:rgba(255,255,255,.1);border:1px solid #444;color:#e0e0e0;padding:10px 20px;border-radius:8px;cursor:pointer;transition:all .3s ease}.back-to-roles button:hover{background:rgba(255,255,255,.2);border-color:#00d4ff}@media (max-width:768px){.role-buttons{flex-direction:column;align-items:center}.role-btn{min-width:250px}.app-container{padding:0 10px}.card{padding:20px}}</style>
+{% endblock %} {% block content %}
+<div class=app-container>
+<div class=header>
+<a href=/ class=logo>AnonShare</a>
+<a href=/ class=back-btn>← Back to Home</a>
+</div>
+<div class=instructions>
+<strong>How to use:</strong> This is a serverless P2P file sharing app. Choose your role below to get started. The connection is established by manually exchanging codes between sender and receiver. No server logs or tracking!
+</div>
+<div class=card id=roleSelectionCard>
+<h2>
+<span class=card-icon>👥</span>
+Choose Your Role
+</h2>
+<div class=role-selection>
+<h3>Are you sending or receiving files?</h3>
+<p>Select your role to get the appropriate interface for establishing a P2P connection.</p>
+<div class=role-buttons>
+<div class=role-btn id=senderBtn>
+<span class=role-icon>📤</span>
+<div class=role-title>Sender</div>
+<div class=role-desc>I want to send files</div>
+</div>
+<div class=role-btn id=receiverBtn>
+<span class=role-icon>📥</span>
+<div class=role-title>Receiver</div>
+<div class=role-desc>I want to receive files</div>
+</div>
+</div>
+</div>
+</div>
+<div class="card connection-setup" id=connectionSetup>
+<h2>
+<span class=card-icon>🔗</span>
+<span id=connectionTitle>Connection Setup</span>
+</h2>
+<div id=senderInterface class=mode-section style=display:none>
+<h3>
+<span>📤</span>
+Sender Setup
+</h3>
+<p>As the sender, you'll create an offer code and share it with the receiver.</p>
+<div class=step-indicator>
+<div class=step-number>1</div>
+<div>Click the button below to generate your offer code</div>
+</div>
+<button id=createOfferBtn class="btn btn-primary">🚀 Create Offer Code</button>
+<div id=offerDisplay class=sdp-display>
+<label>📋 Share this offer code with the receiver:</label>
+<div class=sdp-text id=offerText></div>
+<button id=copyOfferBtn class="btn btn-secondary copy-btn">📋 Copy Offer Code</button>
+</div>
+<div id=answerSection class=answer-section>
+<div class=step-indicator>
+<div class=step-number>2</div>
+<div>Paste the answer code you received from the receiver</div>
+</div>
+<div class=sdp-container>
+<label for=answerInput>Paste the answer code here:</label>
+<textarea id=answerInput placeholder="Paste the answer code from receiver..."></textarea>
+<button id=setAnswerBtn class="btn btn-secondary">✅ Connect with Answer</button>
+</div>
+</div>
+</div>
+<div id=receiverInterface class=mode-section style=display:none>
+<h3>
+<span>📥</span>
+Receiver Setup
+</h3>
+<p>As the receiver, you'll paste the sender's offer code and generate an answer.</p>
+<div class=step-indicator>
+<div class=step-number>1</div>
+<div>Paste the offer code you received from the sender</div>
+</div>
+<div class=sdp-container>
+<label for=offerInput>Paste the offer code here:</label>
+<textarea id=offerInput placeholder="Paste the offer code from sender..."></textarea>
+<button id=setOfferBtn class="btn btn-primary">🔄 Generate Answer Code</button>
+</div>
+<div id=answerDisplay class=sdp-display>
+<div class=step-indicator>
+<div class=step-number>2</div>
+<div>Share this answer code back to the sender</div>
+</div>
+<label>📋 Send this answer code back to the sender:</label>
+<div class=sdp-text id=answerText></div>
+<button id=copyAnswerBtn class="btn btn-secondary copy-btn">📋 Copy Answer Code</button>
+</div>
+</div>
+<div id=connectionStatus class=connection-status>
+<div class=status-indicator id=statusIndicator></div>
+<span>Connection Status: <strong id=statusText>Disconnected</strong></span>
+</div>
+<div class=back-to-roles>
+<button id=backToRolesBtn>← Change Role</button>
+</div>
+<div id=statusMessage class=status></div>
+</div>
+<div class="card file-section" id=fileSection>
+<h2>
+<span class=card-icon>📁</span>
+File Transfer
+</h2>
+<div class=file-input-container>
+<label for=fileInput class=file-input-button id=fileInputButton>
+📎 Click to select files or drag and drop
+</label>
+<input type=file id=fileInput class=file-input-hidden multiple>
+</div>
+<button id=sendFileBtn class="btn btn-primary" disabled>
+📤 Send Selected Files
+</button>
+<div class=progress-container id=sendProgress>
+<div class=progress-info>
+<span><strong>Sending:</strong> <span id=sendFileName></span></span>
+<span class=progress-text id=sendProgressText>0%</span>
+</div>
+<div class=progress-bar>
+<div class=progress-fill id=sendProgressBar></div>
+</div>
+</div>
+<div class=progress-container id=receiveProgress>
+<div class=progress-info>
+<span><strong>Receiving:</strong> <span id=receiveFileName></span></span>
+<span class=progress-text id=receiveProgressText>0%</span>
+</div>
+<div class=progress-bar>
+<div class=progress-fill id=receiveProgressBar></div>
+</div>
+</div>
+<div class=file-list id=fileList>
+<h3>📥 Received Files</h3>
+<div id=receivedFiles></div>
+</div>
+</div>
+</div>
+{% endblock %} {% block extra_js %}
+<script>class ServerlessP2PFileSharing{constructor(){this.peerConnection=null,this.dataChannel=null,this.isInitiator=!1,this.userRole=null,this.receivingFile=null,this.receivedChunks=[],this.initializeUI()}initializeUI(){document.getElementById("senderBtn").addEventListener("click",(()=>{this.selectRole("sender")})),document.getElementById("receiverBtn").addEventListener("click",(()=>{this.selectRole("receiver")})),document.getElementById("backToRolesBtn").addEventListener("click",(()=>{this.backToRoleSelection()})),document.getElementById("createOfferBtn").addEventListener("click",(()=>{this.createOffer()})),document.getElementById("setOfferBtn").addEventListener("click",(()=>{this.setRemoteOffer()})),document.getElementById("setAnswerBtn").addEventListener("click",(()=>{this.setRemoteAnswer()})),document.getElementById("copyOfferBtn").addEventListener("click",(()=>{this.copyToClipboard("offerText")})),document.getElementById("copyAnswerBtn").addEventListener("click",(()=>{this.copyToClipboard("answerText")})),document.getElementById("sendFileBtn").addEventListener("click",(()=>{this.sendFiles()}));const e=document.getElementById("fileInput"),t=document.getElementById("fileInputButton");e.addEventListener("change",(e=>{this.handleFileSelection(e.target.files)})),t.addEventListener("dragover",(e=>{e.preventDefault(),t.style.borderColor="#00d4ff",t.style.background="rgba(0, 212, 255, 0.1)"})),t.addEventListener("dragleave",(e=>{e.preventDefault(),t.style.borderColor="#444",t.style.background="rgba(15, 15, 15, 0.8)"})),t.addEventListener("drop",(n=>{n.preventDefault(),t.style.borderColor="#444",t.style.background="rgba(15, 15, 15, 0.8)";const s=n.dataTransfer.files;e.files=s,this.handleFileSelection(s)}))}selectRole(e){this.userRole=e,document.getElementById("roleSelectionCard").style.display="none",document.getElementById("connectionSetup").classList.add("show"),this.setupPeerConnection(),"sender"===e?(this.isInitiator=!0,document.getElementById("connectionTitle").textContent="Sender Setup",document.getElementById("senderInterface").style.display="block",document.getElementById("receiverInterface").style.display="none"):(this.isInitiator=!1,document.getElementById("connectionTitle").textContent="Receiver Setup",document.getElementById("senderInterface").style.display="none",document.getElementById("receiverInterface").style.display="block"),document.getElementById("connectionStatus").classList.add("show")}backToRoleSelection(){this.peerConnection&&(this.peerConnection.close(),this.peerConnection=null),this.dataChannel=null,this.userRole=null,this.isInitiator=!1,document.getElementById("connectionSetup").classList.remove("show"),document.getElementById("fileSection").classList.remove("show"),document.getElementById("roleSelectionCard").style.display="block",document.getElementById("offerDisplay").classList.remove("show"),document.getElementById("answerDisplay").classList.remove("show"),document.getElementById("answerSection").classList.remove("show"),document.getElementById("connectionStatus").classList.remove("show"),document.getElementById("offerInput").value="",document.getElementById("answerInput").value="",document.getElementById("offerText").textContent="",document.getElementById("answerText").textContent="",this.updateConnectionStatus("disconnected")}setupPeerConnection(){this.peerConnection=new RTCPeerConnection({iceServers:[{urls:"stun:stun.l.google.com:19302"},{urls:"stun:stun1.l.google.com:19302"},{urls:"stun:stun2.l.google.com:19302"}]}),this.peerConnection.onicecandidate=e=>{null===e.candidate&&this.onIceGatheringComplete()},this.peerConnection.ondatachannel=e=>{this.setupDataChannel(e.channel)},this.peerConnection.onconnectionstatechange=()=>{this.updateConnectionStatus(this.peerConnection.connectionState)}}async createOffer(){try{this.dataChannel=this.peerConnection.createDataChannel("fileTransfer",{ordered:!0}),this.setupDataChannel(this.dataChannel);const e=await this.peerConnection.createOffer();await this.peerConnection.setLocalDescription(e),this.showStatus("Offer created! Waiting for ICE candidates...","info"),this.updateConnectionStatus("connecting")}catch(e){console.error("Error creating offer:",e),this.showStatus("Failed to create offer: "+e.message,"error")}}onIceGatheringComplete(){this.isInitiator&&this.peerConnection.localDescription?(document.getElementById("offerText").textContent=JSON.stringify(this.peerConnection.localDescription),document.getElementById("offerDisplay").classList.add("show"),document.getElementById("answerSection").classList.add("show"),this.showStatus("Offer code generated! Share it with the receiver.","success")):!this.isInitiator&&this.peerConnection.localDescription&&(document.getElementById("answerText").textContent=JSON.stringify(this.peerConnection.localDescription),document.getElementById("answerDisplay").classList.add("show"),this.showStatus("Answer code generated! Share it back to the sender.","success"))}async setRemoteOffer(){try{const e=document.getElementById("offerInput").value.trim();if(!e)return void this.showStatus("Please paste the offer code first.","error");const t=JSON.parse(e);await this.peerConnection.setRemoteDescription(t);const n=await this.peerConnection.createAnswer();await this.peerConnection.setLocalDescription(n),this.showStatus("Processing offer... Generating answer code...","info"),this.updateConnectionStatus("connecting")}catch(e){console.error("Error setting remote offer:",e),this.showStatus("Failed to set offer: "+e.message,"error")}}async setRemoteAnswer(){try{const e=document.getElementById("answerInput").value.trim();if(!e)return void this.showStatus("Please paste the answer code first.","error");const t=JSON.parse(e);await this.peerConnection.setRemoteDescription(t),this.showStatus("Answer set! Establishing connection...","info")}catch(e){console.error("Error setting remote answer:",e),this.showStatus("Failed to set answer: "+e.message,"error")}}setupDataChannel(e){this.dataChannel=e,e.onopen=()=>{this.updateConnectionStatus("connected"),this.showFileSection(),this.showStatus("🎉 P2P connection established! You can now transfer files.","success");const e=document.getElementById("fileInput");document.getElementById("sendFileBtn").disabled=0===e.files.length},e.onclose=()=>{this.updateConnectionStatus("disconnected"),document.getElementById("sendFileBtn").disabled=!0},e.onerror=e=>{console.error("Data channel error:",e),this.updateConnectionStatus("error")},e.onmessage=e=>{this.handleDataChannelMessage(e.data)}}handleFileSelection(e){const t=document.getElementById("fileInputButton"),n=document.getElementById("sendFileBtn");e.length>0?(t.classList.add("has-files"),t.textContent=`📎 ${e.length} file(s) selected`,n.disabled=!this.dataChannel||"open"!==this.dataChannel.readyState):(t.classList.remove("has-files"),t.textContent="📎 Click to select files or drag and drop",n.disabled=!0)}sendFiles(){const e=document.getElementById("fileInput").files;this.dataChannel&&"open"===this.dataChannel.readyState?Array.from(e).forEach((e=>this.sendFile(e))):this.showStatus("Connection not ready. Please establish connection first.","error")}sendFile(e){const t=new FileReader;let n=0;const s={type:"file-start",name:e.name,size:e.size,mimeType:e.type};try{this.dataChannel.send(JSON.stringify(s)),this.showSendProgress(e.name,0);const o=()=>{const s=e.slice(n,n+65536);t.readAsArrayBuffer(s)};t.onload=t=>{try{this.dataChannel.send(t.target.result),n+=t.target.result.byteLength;const s=n/e.size*100;this.updateSendProgress(s),n<e.size?setTimeout(o,10):(this.dataChannel.send(JSON.stringify({type:"file-end"})),this.hideSendProgress(),this.showStatus(`📤 File "${e.name}" sent successfully!`,"success"))}catch(e){console.error("Error sending chunk:",e),this.hideSendProgress(),this.showStatus("Error sending file","error")}},t.onerror=()=>{this.hideSendProgress(),this.showStatus("Error reading file","error")},o()}catch(e){console.error("Error starting file send:",e),this.showStatus("Error starting file transfer","error")}}handleDataChannelMessage(e){try{if("string"==typeof e){const t=JSON.parse(e);"file-start"===t.type?(this.receivingFile={name:t.name,size:t.size,mimeType:t.mimeType,receivedSize:0},this.receivedChunks=[],this.showReceiveProgress(t.name,0)):"file-end"===t.type&&this.completeFileReceive()}else if(this.receivingFile){this.receivedChunks.push(e),this.receivingFile.receivedSize+=e.byteLength;const t=this.receivingFile.receivedSize/this.receivingFile.size*100;this.updateReceiveProgress(t)}}catch(e){console.error("Error handling data channel message:",e)}}completeFileReceive(){if(this.receivingFile&&this.receivedChunks.length>0)try{const e=new Blob(this.receivedChunks,{type:this.receivingFile.mimeType});this.addReceivedFile(this.receivingFile.name,e),this.hideReceiveProgress(),this.showStatus(`📥 File "${this.receivingFile.name}" received successfully!`,"success"),this.receivingFile=null,this.receivedChunks=[]}catch(e){console.error("Error completing file receive:",e),this.hideReceiveProgress(),this.showStatus("Error completing file receive","error")}}addReceivedFile(e,t){const n=document.createElement("div");n.className="file-item";const s=document.createElement("div");s.className="file-info";const o=document.createElement("div");o.className="file-name",o.textContent=e;const i=document.createElement("div");i.className="file-size",i.textContent=this.formatFileSize(t.size),s.appendChild(o),s.appendChild(i);const r=document.createElement("button");r.className="btn btn-primary",r.textContent="⬇ Download",r.onclick=()=>this.downloadFile(e,t),n.appendChild(s),n.appendChild(r),document.getElementById("receivedFiles").appendChild(n)}downloadFile(e,t){const n=URL.createObjectURL(t),s=document.createElement("a");s.href=n,s.download=e,document.body.appendChild(s),s.click(),document.body.removeChild(s),URL.revokeObjectURL(n)}async copyToClipboard(e){try{const t=document.getElementById(e).textContent;if(navigator.clipboard&&window.isSecureContext)await navigator.clipboard.writeText(t),this.showStatus("📋 Copied to clipboard!","success");else{const e=document.createElement("textarea");e.value=t,e.style.position="fixed",e.style.left="-999999px",e.style.top="-999999px",document.body.appendChild(e),e.focus(),e.select();try{document.execCommand("copy"),this.showStatus("📋 Copied to clipboard!","success")}catch(e){this.showStatus("Failed to copy to clipboard","error")}e.remove()}}catch(e){console.error("Failed to copy:",e),this.showStatus("Failed to copy to clipboard","error")}}formatFileSize(e){if(0===e)return"0 Bytes";const t=Math.floor(Math.log(e)/Math.log(1024));return parseFloat((e/Math.pow(1024,t)).toFixed(2))+" "+["Bytes","KB","MB","GB"][t]}showStatus(e,t){const n=document.getElementById("statusMessage");n.textContent=e,n.className=`status ${t}`,n.style.display="block","success"===t&&setTimeout((()=>{n.style.display="none"}),5e3)}showFileSection(){document.getElementById("fileSection").classList.add("show")}updateConnectionStatus(e){const t=document.getElementById("statusText"),n=document.getElementById("statusIndicator");t.textContent=e.charAt(0).toUpperCase()+e.slice(1),n.className=`status-indicator ${e}`}showSendProgress(e,t){document.getElementById("sendFileName").textContent=e,document.getElementById("sendProgressText").textContent=`${Math.round(t)}%`,document.getElementById("sendProgressBar").style.width=`${t}%`,document.getElementById("sendProgress").classList.add("show")}updateSendProgress(e){document.getElementById("sendProgressText").textContent=`${Math.round(e)}%`,document.getElementById("sendProgressBar").style.width=`${e}%`}hideSendProgress(){document.getElementById("sendProgress").classList.remove("show")}showReceiveProgress(e,t){document.getElementById("receiveFileName").textContent=e,document.getElementById("receiveProgressText").textContent=`${Math.round(t)}%`,document.getElementById("receiveProgressBar").style.width=`${t}%`,document.getElementById("receiveProgress").classList.add("show")}updateReceiveProgress(e){document.getElementById("receiveProgressText").textContent=`${Math.round(e)}%`,document.getElementById("receiveProgressBar").style.width=`${e}%`}hideReceiveProgress(){document.getElementById("receiveProgress").classList.remove("show")}}document.addEventListener("DOMContentLoaded",(()=>{new ServerlessP2PFileSharing}))</script>
+{% endblock %}
