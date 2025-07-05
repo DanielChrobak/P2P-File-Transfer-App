@@ -1,0 +1,89 @@
+{% extends "base.html" %} {% block title %}AnonShare - Serverless P2P File Sharing{% endblock %} {% block extra_css %}
+<style>.hero{padding:150px 0 100px;text-align:center;position:relative}.hero::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle at 50% 50%,rgba(0,212,255,.1) 0,transparent 50%);pointer-events:none}.hero h1{font-size:4rem;font-weight:700;margin-bottom:20px;background:linear-gradient(135deg,#00d4ff 0,#ff6b6b 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}.hero p{font-size:1.25rem;margin-bottom:40px;color:#b0b0b0;max-width:600px;margin-left:auto;margin-right:auto}.cta-button{display:inline-block;padding:15px 40px;background:linear-gradient(135deg,#00d4ff 0,#09c 100%);color:#fff;text-decoration:none;border-radius:50px;font-weight:600;font-size:1.1rem;transition:all .3s ease;box-shadow:0 10px 30px rgba(0,212,255,.3)}.cta-button:hover{transform:translateY(-3px);box-shadow:0 15px 40px rgba(0,212,255,.4)}.features{padding:100px 0;background:rgba(15,15,15,.8)}.features h2{text-align:center;font-size:2.5rem;margin-bottom:60px;color:#fff}.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:40px}.feature-card{background:rgba(25,25,25,.8);padding:40px 30px;border-radius:20px;border:1px solid #333;text-align:center;transition:all .3s ease;backdrop-filter:blur(10px)}.feature-card:hover{transform:translateY(-10px);border-color:#00d4ff;box-shadow:0 20px 40px rgba(0,212,255,.2)}.feature-icon{font-size:3rem;margin-bottom:20px;color:#00d4ff}.feature-card h3{font-size:1.5rem;margin-bottom:15px;color:#fff}.feature-card p{color:#b0b0b0;line-height:1.6}.how-it-works{padding:100px 0}.how-it-works h2{text-align:center;font-size:2.5rem;margin-bottom:60px;color:#fff}.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:40px}.step{text-align:center;position:relative}.step-number{display:inline-block;width:60px;height:60px;background:linear-gradient(135deg,#00d4ff 0,#09c 100%);border-radius:50%;line-height:60px;font-size:1.5rem;font-weight:700;color:#fff;margin-bottom:20px}.step h3{font-size:1.3rem;margin-bottom:15px;color:#fff}.step p{color:#b0b0b0;line-height:1.6}footer{padding:60px 0 30px;background:rgba(5,5,5,.9);border-top:1px solid #333;text-align:center}.footer-content{margin-bottom:30px}.footer-links{display:flex;justify-content:center;gap:30px;margin-bottom:30px}.footer-links a{color:#b0b0b0;text-decoration:none;transition:color .3s ease}.footer-links a:hover{color:#00d4ff}.copyright{color:#666;font-size:.9rem}@media (max-width:768px){.hero h1{font-size:2.5rem}.features-grid{grid-template-columns:1fr}.steps{grid-template-columns:1fr}}</style>
+{% endblock %} {% block content %}
+<header>
+<nav class=container>
+<a href=/ class=logo>AnonShare</a>
+<ul class=nav-links>
+<li><a href=#features>Features</a></li>
+<li><a href=#how-it-works>How It Works</a></li>
+<li><a href=/app>Launch App</a></li>
+</ul>
+</nav>
+</header>
+<main>
+<section class=hero>
+<div class=container>
+<h1 class=fade-in-up>Serverless P2P File Sharing</h1>
+<p class=fade-in-up>Share files directly between devices with zero server interaction. Completely anonymous and private.</p>
+<a href=/app class="cta-button fade-in-up">Start Sharing</a>
+</div>
+</section>
+<section id=features class=features>
+<div class=container>
+<h2>Why Choose AnonShare?</h2>
+<div class=features-grid>
+<div class=feature-card>
+<div class=feature-icon>🔒</div>
+<h3>Truly Anonymous</h3>
+<p>No server logs, no tracking, no data collection. Your transfers are completely private.</p>
+</div>
+<div class=feature-card>
+<div class=feature-icon>⚡</div>
+<h3>Direct P2P</h3>
+<p>Files transfer directly between devices without any server involvement.</p>
+</div>
+<div class=feature-card>
+<div class=feature-icon>🌐</div>
+<h3>Serverless</h3>
+<p>Manual connection setup eliminates the need for signaling servers.</p>
+</div>
+<div class=feature-card>
+<div class=feature-icon>📱</div>
+<h3>Cross-Platform</h3>
+<p>Works on any device with a modern web browser.</p>
+</div>
+<div class=feature-card>
+<div class=feature-icon>🔄</div>
+<h3>Real-time Progress</h3>
+<p>Track your file transfers with live progress indicators.</p>
+</div>
+<div class=feature-card>
+<div class=feature-icon>🎯</div>
+<h3>Manual Exchange</h3>
+<p>Exchange connection codes manually for maximum security.</p>
+</div>
+</div>
+</div>
+</section>
+<section id=how-it-works class=how-it-works>
+<div class=container>
+<h2>How It Works</h2>
+<div class=steps>
+<div class=step>
+<div class=step-number>1</div>
+<h3>Create Offer</h3>
+<p>Generate a connection offer that contains your device's network information.</p>
+</div>
+<div class=step>
+<div class=step-number>2</div>
+<h3>Share Manually</h3>
+<p>Send the offer code to your friend via any secure channel (email, chat, etc.).</p>
+</div>
+<div class=step>
+<div class=step-number>3</div>
+<h3>Exchange Answer</h3>
+<p>Your friend creates an answer and sends it back to you.</p>
+</div>
+<div class=step>
+<div class=step-number>4</div>
+<h3>Direct Transfer</h3>
+<p>Once connected, transfer files directly with no server involvement.</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+{% endblock %} {% block extra_js %}
+<script>const observerOptions={threshold:.1,rootMargin:"0px 0px -50px 0px"},observer=new IntersectionObserver((e=>{e.forEach((e=>{e.isIntersecting&&(e.target.style.opacity="1",e.target.style.transform="translateY(0)")}))}),observerOptions);document.querySelectorAll(".feature-card, .step").forEach((e=>{e.style.opacity="0",e.style.transform="translateY(30px)",e.style.transition="all 0.8s ease-out",observer.observe(e)}))</script>
+{% endblock %}
