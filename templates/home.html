@@ -1,89 +1,241 @@
-{% extends "base.html" %} {% block title %}AnonShare - Serverless P2P File Sharing{% endblock %} {% block extra_css %}
-<style>.hero{padding:150px 0 100px;text-align:center;position:relative}.hero::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle at 50% 50%,rgba(0,212,255,.1) 0,transparent 50%);pointer-events:none}.hero h1{font-size:4rem;font-weight:700;margin-bottom:20px;background:linear-gradient(135deg,#00d4ff 0,#ff6b6b 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}.hero p{font-size:1.25rem;margin-bottom:40px;color:#b0b0b0;max-width:600px;margin-left:auto;margin-right:auto}.cta-button{display:inline-block;padding:15px 40px;background:linear-gradient(135deg,#00d4ff 0,#09c 100%);color:#fff;text-decoration:none;border-radius:50px;font-weight:600;font-size:1.1rem;transition:all .3s ease;box-shadow:0 10px 30px rgba(0,212,255,.3)}.cta-button:hover{transform:translateY(-3px);box-shadow:0 15px 40px rgba(0,212,255,.4)}.features{padding:100px 0;background:rgba(15,15,15,.8)}.features h2{text-align:center;font-size:2.5rem;margin-bottom:60px;color:#fff}.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:40px}.feature-card{background:rgba(25,25,25,.8);padding:40px 30px;border-radius:20px;border:1px solid #333;text-align:center;transition:all .3s ease;backdrop-filter:blur(10px)}.feature-card:hover{transform:translateY(-10px);border-color:#00d4ff;box-shadow:0 20px 40px rgba(0,212,255,.2)}.feature-icon{font-size:3rem;margin-bottom:20px;color:#00d4ff}.feature-card h3{font-size:1.5rem;margin-bottom:15px;color:#fff}.feature-card p{color:#b0b0b0;line-height:1.6}.how-it-works{padding:100px 0}.how-it-works h2{text-align:center;font-size:2.5rem;margin-bottom:60px;color:#fff}.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:40px}.step{text-align:center;position:relative}.step-number{display:inline-block;width:60px;height:60px;background:linear-gradient(135deg,#00d4ff 0,#09c 100%);border-radius:50%;line-height:60px;font-size:1.5rem;font-weight:700;color:#fff;margin-bottom:20px}.step h3{font-size:1.3rem;margin-bottom:15px;color:#fff}.step p{color:#b0b0b0;line-height:1.6}footer{padding:60px 0 30px;background:rgba(5,5,5,.9);border-top:1px solid #333;text-align:center}.footer-content{margin-bottom:30px}.footer-links{display:flex;justify-content:center;gap:30px;margin-bottom:30px}.footer-links a{color:#b0b0b0;text-decoration:none;transition:color .3s ease}.footer-links a:hover{color:#00d4ff}.copyright{color:#666;font-size:.9rem}@media (max-width:768px){.hero h1{font-size:2.5rem}.features-grid{grid-template-columns:1fr}.steps{grid-template-columns:1fr}}</style>
-{% endblock %} {% block content %}
-<header>
-<nav class=container>
-<a href=/ class=logo>AnonShare</a>
-<ul class=nav-links>
-<li><a href=#features>Features</a></li>
-<li><a href=#how-it-works>How It Works</a></li>
-<li><a href=/app>Launch App</a></li>
-</ul>
-</nav>
-</header>
-<main>
-<section class=hero>
-<div class=container>
-<h1 class=fade-in-up>Serverless P2P File Sharing</h1>
-<p class=fade-in-up>Share files directly between devices with zero server interaction. Completely anonymous and private.</p>
-<a href=/app class="cta-button fade-in-up">Start Sharing</a>
+{% extends "base.html" %}
+
+{% block title %}AnonShare - Anonymous P2P File Sharing{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: 
+            linear-gradient(90deg, transparent 98%, var(--accent) 100%),
+            linear-gradient(180deg, transparent 98%, var(--accent) 100%);
+        background-size: 50px 50px;
+        opacity: 0.1;
+        animation: scan 8s linear infinite;
+    }
+    
+    .hero-content {
+        margin-top: 75px;
+        position: relative;
+        z-index: 2;
+        max-width: 800px;
+    }
+    
+    .hero h1 {
+        font-size: clamp(2.5rem, 8vw, 4rem);
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: var(--accent);
+        text-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+        animation: glitch 3s infinite;
+    }
+    
+    .hero p {
+        font-size: 1.2rem;
+        margin-bottom: 30px;
+        color: var(--text-dim);
+        line-height: 1.6;
+    }
+    
+    .cta {
+        display: inline-block;
+        padding: 16px 32px;
+        background: var(--accent);
+        color: var(--bg-primary);
+        text-decoration: none;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .cta::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s;
+    }
+    
+    .cta:hover::before { left: 100%; }
+    
+    .cta:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(0, 255, 65, 0.4);
+    }
+    
+    .features {
+        padding: 80px 0;
+        background: var(--bg-secondary);
+    }
+    
+    .features h2 {
+        text-align: center;
+        font-size: 2.5rem;
+        margin-bottom: 50px;
+        color: var(--accent);
+    }
+    
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+    }
+    
+    .feature {
+        background: var(--bg-tertiary);
+        padding: 30px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .feature::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--accent);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+    
+    .feature:hover::before { transform: scaleX(1); }
+    
+    .feature:hover {
+        transform: translateY(-5px);
+        border-color: var(--accent);
+        box-shadow: 0 10px 30px rgba(0, 255, 65, 0.1);
+    }
+    
+    .feature-icon {
+        font-size: 2rem;
+        margin-bottom: 15px;
+        color: var(--accent);
+    }
+    
+    .feature h3 {
+        font-size: 1.3rem;
+        margin-bottom: 10px;
+        color: var(--text);
+    }
+    
+    .feature p {
+        color: var(--text-dim);
+        line-height: 1.6;
+    }
+    
+    .footer {
+        text-align: center;
+        padding: 40px 0;
+        border-top: 1px solid var(--border);
+        color: var(--text-dim);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="header">
+    <nav class="container nav">
+        <a href="/" class="logo">AnonShare</a>
+        <a href="/app" class="nav-link">Launch App</a>
+    </nav>
 </div>
+
+<section class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <h1>Anonymous P2P File Sharing</h1>
+            <p>Share files directly between devices with zero server interaction. Completely anonymous, secure, and private.</p>
+            <a href="/app" class="cta">Start Sharing</a>
+        </div>
+    </div>
 </section>
-<section id=features class=features>
-<div class=container>
-<h2>Why Choose AnonShare?</h2>
-<div class=features-grid>
-<div class=feature-card>
-<div class=feature-icon>🔒</div>
-<h3>Truly Anonymous</h3>
-<p>No server logs, no tracking, no data collection. Your transfers are completely private.</p>
-</div>
-<div class=feature-card>
-<div class=feature-icon>⚡</div>
-<h3>Direct P2P</h3>
-<p>Files transfer directly between devices without any server involvement.</p>
-</div>
-<div class=feature-card>
-<div class=feature-icon>🌐</div>
-<h3>Serverless</h3>
-<p>Manual connection setup eliminates the need for signaling servers.</p>
-</div>
-<div class=feature-card>
-<div class=feature-icon>📱</div>
-<h3>Cross-Platform</h3>
-<p>Works on any device with a modern web browser.</p>
-</div>
-<div class=feature-card>
-<div class=feature-icon>🔄</div>
-<h3>Real-time Progress</h3>
-<p>Track your file transfers with live progress indicators.</p>
-</div>
-<div class=feature-card>
-<div class=feature-icon>🎯</div>
-<h3>Manual Exchange</h3>
-<p>Exchange connection codes manually for maximum security.</p>
-</div>
-</div>
-</div>
+
+<section class="features">
+    <div class="container">
+        <h2>Features</h2>
+        <div class="features-grid">
+            <div class="feature">
+                <div class="feature-icon">🔒</div>
+                <h3>Anonymous</h3>
+                <p>No server logs, tracking, or data collection. Your transfers are completely private.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">⚡</div>
+                <h3>Direct P2P</h3>
+                <p>Files transfer directly between devices without any server involvement.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🌐</div>
+                <h3>Serverless</h3>
+                <p>Manual connection setup eliminates the need for signaling servers.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📱</div>
+                <h3>Cross-Platform</h3>
+                <p>Works on any device with a modern web browser.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🔄</div>
+                <h3>Real-time</h3>
+                <p>Track your file transfers with live progress indicators.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🛡️</div>
+                <h3>Secure</h3>
+                <p>Exchange connection codes manually for maximum security.</p>
+            </div>
+        </div>
+    </div>
 </section>
-<section id=how-it-works class=how-it-works>
-<div class=container>
-<h2>How It Works</h2>
-<div class=steps>
-<div class=step>
-<div class=step-number>1</div>
-<h3>Create Offer</h3>
-<p>Generate a connection offer that contains your device's network information.</p>
-</div>
-<div class=step>
-<div class=step-number>2</div>
-<h3>Share Manually</h3>
-<p>Send the offer code to your friend via any secure channel (email, chat, etc.).</p>
-</div>
-<div class=step>
-<div class=step-number>3</div>
-<h3>Exchange Answer</h3>
-<p>Your friend creates an answer and sends it back to you.</p>
-</div>
-<div class=step>
-<div class=step-number>4</div>
-<h3>Direct Transfer</h3>
-<p>Once connected, transfer files directly with no server involvement.</p>
-</div>
-</div>
-</div>
-</section>
-</main>
-{% endblock %} {% block extra_js %}
-<script>const observerOptions={threshold:.1,rootMargin:"0px 0px -50px 0px"},observer=new IntersectionObserver((e=>{e.forEach((e=>{e.isIntersecting&&(e.target.style.opacity="1",e.target.style.transform="translateY(0)")}))}),observerOptions);document.querySelectorAll(".feature-card, .step").forEach((e=>{e.style.opacity="0",e.style.transform="translateY(30px)",e.style.transition="all 0.8s ease-out",observer.observe(e)}))</script>
+
+<footer class="footer">
+    <div class="container">
+        <p>&copy; 2025 AnonShare. Built for privacy.</p>
+    </div>
+</footer>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add typing effect to hero title
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('.hero h1');
+        const text = title.textContent;
+        title.textContent = '';
+        
+        let i = 0;
+        const typeWriter = () => {
+            if (i < text.length) {
+                title.textContent += text.charAt(i);
+                i++;
+                setTimeout(typeWriter, 100);
+            }
+        };
+        
+        setTimeout(typeWriter, 500);
+    });
+</script>
 {% endblock %}
