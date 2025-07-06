@@ -1,0 +1,645 @@
+{% extends "base.html" %}
+
+{% block title %}AnonShare - Anonymous P2P File Sharing{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: 
+            linear-gradient(90deg, transparent 98%, var(--accent) 100%),
+            linear-gradient(180deg, transparent 98%, var(--accent) 100%);
+        background-size: 50px 50px;
+        opacity: 0.1;
+        animation: scan 8s linear infinite;
+    }
+    
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        max-width: 800px;
+    }
+    
+    .hero h1 {
+        font-size: clamp(2.5rem, 8vw, 4rem);
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: var(--accent);
+        text-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+        animation: glitch 3s infinite;
+    }
+    
+    .hero p {
+        font-size: 1.2rem;
+        margin-bottom: 30px;
+        color: var(--text-dim);
+        line-height: 1.6;
+    }
+    
+    .cta {
+        display: inline-block;
+        padding: 16px 32px;
+        background: var(--accent);
+        color: var(--bg-primary);
+        text-decoration: none;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .cta::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s;
+    }
+    
+    .cta:hover::before { left: 100%; }
+    
+    .cta:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(0, 255, 65, 0.4);
+    }
+    
+    .features {
+        padding: 80px 0;
+        background: var(--bg-secondary);
+    }
+    
+    .features h2 {
+        text-align: center;
+        font-size: 2.5rem;
+        margin-bottom: 50px;
+        color: var(--accent);
+    }
+    
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+    }
+    
+    .feature {
+        background: var(--bg-tertiary);
+        padding: 30px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .feature::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--accent);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+    
+    .feature:hover::before { transform: scaleX(1); }
+    
+    .feature:hover {
+        transform: translateY(-5px);
+        border-color: var(--accent);
+        box-shadow: 0 10px 30px rgba(0, 255, 65, 0.1);
+    }
+    
+    .feature-icon {
+        font-size: 2rem;
+        margin-bottom: 15px;
+        color: var(--accent);
+    }
+    
+    .feature h3 {
+        font-size: 1.3rem;
+        margin-bottom: 10px;
+        color: var(--text);
+    }
+    
+    .feature p {
+        color: var(--text-dim);
+        line-height: 1.6;
+    }
+    
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(10px);
+        z-index: 10000;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .modal.show {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 1;
+    }
+    
+    .modal-content {
+        background: var(--bg-tertiary);
+        border: 1px solid var(--accent);
+        border-radius: 12px;
+        padding: 30px;
+        max-width: 90vw;
+        max-height: 90vh;
+        overflow-y: auto;
+        position: relative;
+        transform: scale(0.8);
+        transition: transform 0.3s ease;
+        box-shadow: 0 20px 60px rgba(0, 255, 65, 0.2);
+    }
+    
+    .modal.show .modal-content {
+        transform: scale(1);
+    }
+    
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--border);
+    }
+    
+    .modal-title {
+        font-size: 1.8rem;
+        color: var(--accent);
+        margin: 0;
+    }
+    
+    .modal-close {
+        background: none;
+        border: none;
+        color: var(--text-dim);
+        font-size: 24px;
+        cursor: pointer;
+        padding: 5px;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+    }
+    
+    .modal-close:hover {
+        color: var(--accent);
+        background: rgba(0, 255, 65, 0.1);
+    }
+    
+    .modal-body {
+        color: var(--text-dim);
+        line-height: 1.6;
+    }
+    
+    .modal-body h3 {
+        color: var(--accent);
+        margin: 25px 0 15px 0;
+        font-size: 1.3rem;
+    }
+    
+    .modal-body h4 {
+        color: var(--text);
+        margin: 20px 0 10px 0;
+        font-size: 1.1rem;
+    }
+    
+    .modal-body p {
+        margin-bottom: 15px;
+    }
+    
+    .modal-body ul {
+        margin: 15px 0 15px 20px;
+    }
+    
+    .modal-body li {
+        margin-bottom: 8px;
+    }
+    
+    /* Contact Form Modal */
+    .contact-form {
+        max-width: 500px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--text);
+        font-weight: 500;
+    }
+    
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 12px 16px;
+        background: var(--bg-primary);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        color: var(--text);
+        font-family: inherit;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-group input:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 10px rgba(0, 255, 65, 0.2);
+    }
+    
+    .form-group textarea {
+        resize: vertical;
+        min-height: 120px;
+    }
+    
+    .submit-btn {
+        width: 100%;
+        padding: 12px 24px;
+        background: var(--accent);
+        color: var(--bg-primary);
+        border: none;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .submit-btn:hover {
+        background: var(--accent-dim);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 255, 65, 0.3);
+    }
+    
+    .footer {
+        text-align: center;
+        padding: 40px 0;
+        border-top: 1px solid var(--border);
+        color: var(--text-dim);
+        background: var(--bg-primary);
+    }
+    
+    .footer-links {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+    
+    .footer-links a,
+    .footer-links button {
+        color: var(--text-dim);
+        text-decoration: none;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: inherit;
+        transition: color 0.3s ease;
+        padding: 0;
+    }
+    
+    .footer-links a:hover,
+    .footer-links button:hover {
+        color: var(--accent);
+    }
+    
+    /* Animations */
+    @keyframes modalSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-50px) scale(0.8);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+    
+    .modal-content {
+        animation: modalSlideIn 0.4s ease-out;
+    }
+    
+    @media (max-width: 768px) {
+        .features-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .modal-content {
+            margin: 20px;
+            padding: 20px;
+        }
+        
+        .footer-links {
+            flex-direction: column;
+            gap: 15px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="header">
+    <nav class="container nav">
+        <a href="/" class="logo">AnonShare</a>
+        <div style="display: flex; gap: 20px;">
+            <a href="#features" class="nav-link">Features</a>
+            <button class="nav-link" onclick="openModal('privacyModal')" style="background: none; border: none; color: inherit; font-family: inherit; font-size: inherit; cursor: pointer; padding: 8px 16px; border: 1px solid transparent; border-radius: 4px; transition: all 0.3s ease;">Privacy</button>
+            <button class="nav-link" onclick="openModal('contactModal')" style="background: none; border: none; color: inherit; font-family: inherit; font-size: inherit; cursor: pointer; padding: 8px 16px; border: 1px solid transparent; border-radius: 4px; transition: all 0.3s ease;">Contact</button>
+            <a href="/app" class="nav-link">Launch App</a>
+        </div>
+    </nav>
+</div>
+
+<section class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <h1>Anonymous P2P File Sharing</h1>
+            <p>Share files directly between devices with zero server interaction. Completely anonymous, secure, and private.</p>
+            <a href="/app" class="cta">Start Sharing</a>
+        </div>
+    </div>
+</section>
+
+<section id="features" class="features">
+    <div class="container">
+        <h2>Features</h2>
+        <div class="features-grid">
+            <div class="feature">
+                <div class="feature-icon">🔒</div>
+                <h3>Anonymous</h3>
+                <p>No server logs, tracking, or data collection. Your transfers are completely private.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">⚡</div>
+                <h3>Direct P2P</h3>
+                <p>Files transfer directly between devices without any server involvement.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🌐</div>
+                <h3>Serverless</h3>
+                <p>Manual connection setup eliminates the need for signaling servers.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📱</div>
+                <h3>Cross-Platform</h3>
+                <p>Works on any device with a modern web browser.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🔄</div>
+                <h3>Real-time</h3>
+                <p>Track your file transfers with live progress indicators.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🛡️</div>
+                <h3>Secure</h3>
+                <p>Exchange connection codes manually for maximum security.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Privacy Policy Modal -->
+<div id="privacyModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Privacy Policy</h2>
+            <button class="modal-close" onclick="closeModal('privacyModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p><strong>Last updated:</strong> January 2025</p>
+            
+            <h3>Your Privacy is Our Priority</h3>
+            <p>AnonShare is designed with privacy at its core. We do not collect, store, or process any personal data or files. Our service operates entirely peer-to-peer.</p>
+            
+            <h4>What We Don't Collect</h4>
+            <ul>
+                <li>Personal information (names, emails, addresses)</li>
+                <li>File contents or metadata</li>
+                <li>IP addresses or connection logs</li>
+                <li>Usage analytics or tracking data</li>
+                <li>Cookies for tracking purposes</li>
+            </ul>
+            
+            <h4>How It Works</h4>
+            <p>All file transfers happen directly between your devices using WebRTC technology. Our server only serves the application code - it never sees or stores your files or connection data.</p>
+            
+            <h4>Technical Details</h4>
+            <ul>
+                <li>Connections are established peer-to-peer</li>
+                <li>All data is encrypted in transit</li>
+                <li>No central server processes your files</li>
+                <li>Connection codes are generated locally</li>
+            </ul>
+            
+            <h4>Third Parties</h4>
+            <p>We use STUN servers (Google's public STUN servers) only to help establish peer-to-peer connections. These servers do not store any data about your transfers.</p>
+            
+            <h4>Data Retention</h4>
+            <p>Since we don't collect any data, there's nothing to retain. All connection information is temporary and exists only during the active transfer session.</p>
+            
+            <h4>Your Rights</h4>
+            <p>Since no personal data is collected, there are no data rights to exercise. You maintain complete control over your files and connections at all times.</p>
+            
+            <h4>Contact</h4>
+            <p>If you have questions about this privacy policy, please contact us using our contact form.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Contact Modal -->
+<div id="contactModal" class="modal">
+    <div class="modal-content contact-form">
+        <div class="modal-header">
+            <h2 class="modal-title">Contact Us</h2>
+            <button class="modal-close" onclick="closeModal('contactModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="contactForm" onsubmit="handleContactSubmit(event)">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="subject">Subject</label>
+                    <input type="text" id="subject" name="subject" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="message">Message</label>
+                    <textarea id="message" name="message" placeholder="Tell us how we can help you..." required></textarea>
+                </div>
+                
+                <button type="submit" class="submit-btn">Send Message</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="container">
+        <div class="footer-links">
+            <button onclick="openModal('privacyModal')">Privacy Policy</button>
+            <button onclick="openModal('contactModal')">Contact</button>
+            <a href="/app" target="_blank">Launch App</a>
+            <a href="https://github.com/DanielChrobak/P2P-File-Transfer-App" target="_blank">GitHub</a>
+        </div>
+        <p>&copy; 2025 AnonShare. Built for privacy and security.</p>
+    </div>
+</footer>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Modal functions
+    function openModal(modalId) {
+        const modal = document.getElementById(modalId);
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+        
+        // Close on background click
+        modal.onclick = function(e) {
+            if (e.target === modal) {
+                closeModal(modalId);
+            }
+        };
+    }
+    
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        modal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+    }
+    
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const openModal = document.querySelector('.modal.show');
+            if (openModal) {
+                closeModal(openModal.id);
+            }
+        }
+    });
+    
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            const href = this.getAttribute('href');
+            if (href.startsWith('#') && href !== '#') {
+                e.preventDefault();
+                const target = document.querySelector(href);
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            }
+        });
+    });
+
+    // Contact form handling
+    function handleContactSubmit(e) {
+        e.preventDefault();
+        
+        // Simple form validation
+        const name = document.getElementById('name').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const subject = document.getElementById('subject').value.trim();
+        const message = document.getElementById('message').value.trim();
+        
+        if (name.length < 2) {
+            alert('Please enter a valid name (at least 2 characters).');
+            return;
+        }
+        
+        if (!email.includes('@') || email.length < 5) {
+            alert('Please enter a valid email address.');
+            return;
+        }
+        
+        if (subject.length < 3) {
+            alert('Please enter a subject (at least 3 characters).');
+            return;
+        }
+        
+        if (message.length < 10) {
+            alert('Please enter a message (at least 10 characters).');
+            return;
+        }
+        
+        // Simulate form submission
+        const submitBtn = document.querySelector('.submit-btn');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Sending...';
+        submitBtn.disabled = true;
+        
+        setTimeout(() => {
+            alert('Thank you for your message! We\'ll get back to you soon.');
+            document.getElementById('contactForm').reset();
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+            closeModal('contactModal');
+        }, 1500);
+    }
+
+    // Add typing effect to hero title
+    document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('.hero h1');
+        const text = title.textContent;
+        title.textContent = '';
+        
+        let i = 0;
+        const typeWriter = () => {
+            if (i < text.length) {
+                title.textContent += text.charAt(i);
+                i++;
+                setTimeout(typeWriter, 100);
+            }
+        };
+        
+        setTimeout(typeWriter, 500);
+    });
+</script>
+{% endblock %}
