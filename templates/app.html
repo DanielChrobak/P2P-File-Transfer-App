@@ -6,7 +6,7 @@
 <style>
     body { padding-top: 80px; }
     
-    .app { max-width: 900px; margin: 0 auto; margin-top: 75px; padding: 20px; }
+    .app { max-width: 900px; margin: 0 auto; padding: 20px; }
     
     .card {
         background: var(--bg-tertiary);
@@ -297,6 +297,19 @@
     
     .mobile-warning.show { display: block; }
     
+    .background-warning {
+        background: rgba(255, 68, 68, 0.1);
+        border: 1px solid var(--error);
+        border-radius: 6px;
+        padding: 15px;
+        margin-bottom: 20px;
+        color: var(--error);
+        display: none;
+        text-align: center;
+    }
+    
+    .background-warning.show { display: block; }
+    
     @media (max-width: 768px) {
         .role-grid { grid-template-columns: 1fr; }
         .transfer-stats { grid-template-columns: 1fr; }
@@ -315,6 +328,10 @@
 <div class="app">
     <div class="mobile-warning" id="mobileWarning">
         <strong>📱 Mobile:</strong> Use share buttons for codes. Keep tab active during transfers.
+    </div>
+
+    <div class="background-warning" id="backgroundWarning">
+        <strong>⚠️ Tab Backgrounded:</strong> Transfer speeds are reduced when this tab is not active. Keep this tab focused for optimal performance.
     </div>
 
     <!-- Role Selection -->
@@ -428,16 +445,25 @@ class P2P {
         this.dc = null;
         this.role = null;
         this.isInit = false;
-        this.chunkSize = 64 * 1024; // Reduced to 16KB for better reliability
-        this.sendDelay = 1; // Reduced delay for faster sending
+        this.chunkSize = 32 * 1024; // Optimized 32KB chunks
+        this.sendDelay = 1; // Minimal delay for maximum speed
         
         // Multi-file transfer management
-        this.activeTransfers = new Map(); // fileId -> transfer data
+        this.activeTransfers = new Map();
         this.fileCounter = 0;
-        this.messageQueue = []; // Queue for reliable message delivery
+        this.messageQueue = [];
         this.isProcessingQueue = false;
         
+        // Background throttling detection and mitigation
+        this.isTabActive = true;
+        this.lastActivityTime = Date.now();
+        this.backgroundWarningShown = false;
+        this.keepAliveWorker = null;
+        this.performanceMonitor = null;
+        
         this.init();
+        this.setupBackgroundDetection();
+        this.setupPerformanceOptimizations();
     }
 
     init() {
@@ -491,11 +517,138 @@ class P2P {
         };
     }
 
+    setupBackgroundDetection() {
+        // Page Visibility API to detect tab switching
+        document.addEventListener('visibilitychange', () => {
+            this.isTabActive = !document.hidden;
+            
+            if (this.isTabActive) {
+                this.hideBackgroundWarning();
+                this.optimizeForForeground();
+            } else {
+                this.showBackgroundWarning();
+                this.optimizeForBackground();
+            }
+        });
+
+        // Window focus/blur events as backup
+        window.addEventListener('focus', () => {
+            this.isTabActive = true;
+            this.hideBackgroundWarning();
+            this.optimizeForForeground();
+        });
+
+        window.addEventListener('blur', () => {
+            this.isTabActive = false;
+            this.showBackgroundWarning();
+            this.optimizeForBackground();
+        });
+    }
+
+    setupPerformanceOptimizations() {
+        // Create a Web Worker for background processing
+        try {
+            const workerCode = `
+                let keepAliveInterval;
+                self.onmessage = function(e) {
+                    if (e.data.type === 'start') {
+                        keepAliveInterval = setInterval(() => {
+                            self.postMessage({type: 'keepalive', timestamp: Date.now()});
+                        }, 100); // High frequency keep-alive
+                    } else if (e.data.type === 'stop') {
+                        if (keepAliveInterval) {
+                            clearInterval(keepAliveInterval);
+                            keepAliveInterval = null;
+                        }
+                    }
+                };
+            `;
+            
+            const blob = new Blob([workerCode], { type: 'application/javascript' });
+            this.keepAliveWorker = new Worker(URL.createObjectURL(blob));
+            
+            this.keepAliveWorker.onmessage = (e) => {
+                if (e.data.type === 'keepalive') {
+                    this.lastActivityTime = Date.now();
+                    // Trigger a minimal DOM update to keep the tab active
+                    document.title = `AnonShare ${this.isTabActive ? '' : '(Background)'} - ${Date.now() % 1000}`;
+                }
+            };
+            
+            console.log('✅ Background optimization worker created');
+        } catch (e) {
+            console.warn('⚠️ Could not create background worker:', e);
+        }
+
+        // Performance monitoring
+        this.performanceMonitor = setInterval(() => {
+            this.monitorTransferPerformance();
+        }, 1000);
+    }
+
+    showBackgroundWarning() {
+        if (!this.backgroundWarningShown && this.hasActiveTransfers()) {
+            document.getElementById('backgroundWarning').classList.add('show');
+            this.backgroundWarningShown = true;
+        }
+    }
+
+    hideBackgroundWarning() {
+        document.getElementById('backgroundWarning').classList.remove('show');
+        this.backgroundWarningShown = false;
+    }
+
+    optimizeForBackground() {
+        // Start aggressive keep-alive when backgrounded
+        if (this.keepAliveWorker) {
+            this.keepAliveWorker.postMessage({type: 'start'});
+        }
+        
+        // Reduce chunk size and increase frequency for background
+        this.chunkSize = 16 * 1024; // Smaller chunks
+        this.sendDelay = 0; // No delay
+        
+        console.log('🔄 Optimized for background operation');
+    }
+
+    optimizeForForeground() {
+        // Stop aggressive keep-alive when in foreground
+        if (this.keepAliveWorker) {
+            this.keepAliveWorker.postMessage({type: 'stop'});
+        }
+        
+        // Restore optimal chunk size for foreground
+        this.chunkSize = 32 * 1024; // Larger chunks
+        this.sendDelay = 1; // Minimal delay
+        
+        console.log('🔄 Optimized for foreground operation');
+    }
+
+    hasActiveTransfers() {
+        return this.activeTransfers.size > 0;
+    }
+
+    monitorTransferPerformance() {
+        // Monitor for speed drops and adjust accordingly
+        this.activeTransfers.forEach((transfer, fileId) => {
+            if (transfer.type === 'sending') {
+                const now = Date.now();
+                const timeSinceUpdate = now - transfer.lastUpdate;
+                
+                // If no update for more than 2 seconds, something is wrong
+                if (timeSinceUpdate > 2000 && !this.isTabActive) {
+                    console.warn('⚠️ Transfer stalled due to background throttling');
+                    this.showBackgroundWarning();
+                }
+            }
+        });
+    }
+
     generateFileId() {
         return `file_${Date.now()}_${++this.fileCounter}`;
     }
 
-    // Queue system for reliable message delivery
+    // Enhanced queue system with burst sending
     queueMessage(message) {
         this.messageQueue.push(message);
         this.processQueue();
@@ -507,42 +660,50 @@ class P2P {
         }
 
         this.isProcessingQueue = true;
+        let burstCount = 0;
+        const maxBurst = this.isTabActive ? 10 : 5; // Send more when active
 
-        while (this.messageQueue.length > 0) {
+        while (this.messageQueue.length > 0 && burstCount < maxBurst) {
             const message = this.messageQueue.shift();
             
             try {
-                // Check buffer before sending
-                if (this.dc.bufferedAmount > 1024 * 1024) { // 1MB buffer limit
-                    // Put message back and wait
+                // More aggressive buffer management
+                if (this.dc.bufferedAmount > 512 * 1024) { // 512KB limit
                     this.messageQueue.unshift(message);
                     await this.waitForBuffer();
                     continue;
                 }
 
                 this.dc.send(message);
+                burstCount++;
                 
-                // Small delay between messages to prevent overwhelming
-                await new Promise(resolve => setTimeout(resolve, 1));
+                // Minimal delay between burst sends
+                if (burstCount < maxBurst && this.messageQueue.length > 0) {
+                    await new Promise(resolve => setTimeout(resolve, 0));
+                }
                 
             } catch (error) {
                 console.error('Error sending message:', error);
-                // Put message back for retry
                 this.messageQueue.unshift(message);
                 break;
             }
         }
 
         this.isProcessingQueue = false;
+        
+        // Schedule next batch if more messages remain
+        if (this.messageQueue.length > 0) {
+            setTimeout(() => this.processQueue(), this.isTabActive ? 1 : 5);
+        }
     }
 
     waitForBuffer() {
         return new Promise(resolve => {
             const checkBuffer = () => {
-                if (this.dc.bufferedAmount < 512 * 1024) { // Wait for buffer to be under 512KB
+                if (this.dc.bufferedAmount < 256 * 1024) { // Wait for buffer to be under 256KB
                     resolve();
                 } else {
-                    setTimeout(checkBuffer, 100);
+                    setTimeout(checkBuffer, 50);
                 }
             };
             checkBuffer();
@@ -553,7 +714,6 @@ class P2P {
         const transfersContainer = document.getElementById('activeTransfers');
         const transfersTitle = document.getElementById('transfersTitle');
         
-        // Show transfers section
         transfersTitle.style.display = 'block';
         
         const transferItem = document.createElement('div');
@@ -608,20 +768,18 @@ class P2P {
         if (transferItem) {
             transferItem.classList.add('completed');
             
-            // Remove after 5 seconds
             setTimeout(() => {
                 transferItem.remove();
                 
-                // Hide transfers section if empty
                 const activeTransfers = document.getElementById('activeTransfers');
                 const transfersTitle = document.getElementById('transfersTitle');
                 if (activeTransfers.children.length === 0) {
                     transfersTitle.style.display = 'none';
+                    this.hideBackgroundWarning();
                 }
-            }, 5000);
+            }, 3000); // Reduced cleanup time
         }
         
-        // Clean up transfer data
         this.activeTransfers.delete(fileId);
     }
 
@@ -654,12 +812,17 @@ class P2P {
         this.pc = this.dc = this.role = null;
         this.isInit = false;
         
-        // Clear active transfers
+        // Clean up background optimizations
+        if (this.keepAliveWorker) {
+            this.keepAliveWorker.postMessage({type: 'stop'});
+        }
+        
         this.activeTransfers.clear();
         this.messageQueue = [];
         this.isProcessingQueue = false;
         document.getElementById('activeTransfers').innerHTML = '';
         document.getElementById('transfersTitle').style.display = 'none';
+        this.hideBackgroundWarning();
         
         document.getElementById('setupCard').classList.remove('show');
         document.getElementById('transferCard').classList.remove('show');
@@ -764,8 +927,8 @@ class P2P {
     setupDC(channel) {
         this.dc = channel;
         
-        // Set buffer threshold for flow control
-        channel.bufferedAmountLowThreshold = 512 * 1024; // 512KB
+        // Optimized buffer settings
+        channel.bufferedAmountLowThreshold = 256 * 1024; // 256KB threshold
         
         channel.onopen = () => {
             this.updateStatus('connected');
@@ -782,7 +945,6 @@ class P2P {
         };
         
         channel.onbufferedamountlow = () => {
-            // Resume processing queue when buffer is low
             this.processQueue();
         };
         
@@ -877,10 +1039,8 @@ class P2P {
         const reader = new FileReader();
         let offset = 0;
 
-        // Create transfer UI
         this.createTransferUI(fileId, file.name, file.size, 'sending');
 
-        // Store transfer data
         const transferData = {
             fileId,
             fileName: file.name,
@@ -893,7 +1053,7 @@ class P2P {
         
         this.activeTransfers.set(fileId, transferData);
 
-        // Send file metadata as JSON
+        // Send file metadata
         const metadata = JSON.stringify({
             type: 'start',
             fileId: fileId,
@@ -911,10 +1071,8 @@ class P2P {
 
         reader.onload = e => {
             try {
-                // Send binary data directly (not as JSON)
+                // Send binary data with optimized header
                 const chunkData = new Uint8Array(e.target.result);
-                
-                // Create a header with fileId and send as binary
                 const header = new TextEncoder().encode(`${fileId}:`);
                 const combined = new Uint8Array(header.length + chunkData.length);
                 combined.set(header, 0);
@@ -925,12 +1083,12 @@ class P2P {
                 offset += e.target.result.byteLength;
                 const progress = (offset / file.size) * 100;
                 
-                // Update progress
+                // Enhanced progress tracking
                 const now = Date.now();
                 const timeDiff = (now - transferData.lastUpdate) / 1000;
                 const bytesDiff = offset - transferData.lastTransferred;
                 
-                if (timeDiff >= 0.5) {
+                if (timeDiff >= 0.2) { // Update every 200ms for smoother progress
                     const speed = bytesDiff / timeDiff / (1024 * 1024);
                     const remaining = file.size - offset;
                     const eta = speed > 0 ? remaining / (speed * 1024 * 1024) : 0;
@@ -942,9 +1100,13 @@ class P2P {
                 }
 
                 if (offset < file.size) {
-                    setTimeout(send, this.sendDelay);
+                    // Use requestAnimationFrame for smooth sending when tab is active
+                    if (this.isTabActive) {
+                        requestAnimationFrame(send);
+                    } else {
+                        setTimeout(send, this.sendDelay);
+                    }
                 } else {
-                    // Send end marker as JSON
                     const endMessage = JSON.stringify({ 
                         type: 'end', 
                         fileId: fileId 
@@ -966,16 +1128,13 @@ class P2P {
     handleMsg(data) {
         try {
             if (typeof data === 'string') {
-                // Handle JSON messages (metadata)
                 const msg = JSON.parse(data);
                 
                 if (msg.type === 'start') {
                     const fileId = msg.fileId;
                     
-                    // Create transfer UI for receiving
                     this.createTransferUI(fileId, msg.name, msg.size, 'receiving');
                     
-                    // Store receive data
                     const transferData = {
                         fileId,
                         fileName: msg.name,
@@ -1003,11 +1162,9 @@ class P2P {
                     }
                 }
             } else {
-                // Handle binary data (file chunks)
                 const arrayBuffer = data instanceof ArrayBuffer ? data : data.buffer;
                 const uint8Array = new Uint8Array(arrayBuffer);
                 
-                // Extract fileId from header
                 const headerEnd = uint8Array.indexOf(58); // ':' character
                 if (headerEnd === -1) return;
                 
@@ -1021,12 +1178,12 @@ class P2P {
                     
                     const progress = (transferData.received / transferData.fileSize) * 100;
                     
-                    // Update progress
+                    // Enhanced progress tracking for receiver
                     const now = Date.now();
                     const timeDiff = (now - transferData.lastUpdate) / 1000;
                     const bytesDiff = transferData.received - transferData.lastTransferred;
                     
-                    if (timeDiff >= 0.5) {
+                    if (timeDiff >= 0.2) { // Update every 200ms
                         const speed = bytesDiff / timeDiff / (1024 * 1024);
                         const remaining = transferData.fileSize - transferData.received;
                         const eta = speed > 0 ? remaining / (speed * 1024 * 1024) : 0;
